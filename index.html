@@ -123,7 +123,15 @@
   </form>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
+    const supabase = supabase.createClient(
+      "https://uhokqclbxoevlxrzeinf.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk"
+    );
+
+<script>
     const supabase = supabase.createClient(
       "https://uhokqclbxoevlxrzeinf.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk"
@@ -155,6 +163,20 @@
 
       latestReports = latestReports.filter(r => !(r.company === company && r.location === location));
       latestReports.push({ company, location, status, time: new Date().toLocaleTimeString() });
+
+    try {
+      const { error } = await supabase.from('reports').insert({ name, phone, company, location, status });
+      if (error) {
+        console.error("Supabase insert error:", error);
+        alert("Failed to submit report. Try again.");
+        return;
+      }
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      alert("Something went wrong submitting your report.");
+      return;
+    }
+
 
       const { error } = await supabase.from("reports").insert({ name, phone, company, location, status });
       if (error) {
