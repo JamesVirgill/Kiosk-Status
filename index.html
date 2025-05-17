@@ -190,6 +190,7 @@
       const selectedCompany = document.getElementById("companyFilter").value;
       const tbody = document.getElementById("status-table-body");
       tbody.innerHTML = "";
+      console.log("Rendering status table for:", selectedCompany);
 
       const locations = locationsByCompany[selectedCompany] || [];
       locations.forEach(location => {
