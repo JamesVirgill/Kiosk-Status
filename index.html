@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,9 +22,6 @@
       color: #0f0;
       text-decoration: none;
       font-weight: bold;
-    }
-    a.back-link:hover {
-      text-decoration: underline;
     }
     h1, h2 {
       text-align: center;
@@ -71,19 +69,6 @@
       .status-table, .form-container {
         width: 100%;
       }
-      .status-table th, .status-table td {
-        padding: 8px;
-        font-size: 14px;
-      }
-      select, input, button {
-        font-size: 16px;
-      }
-      body {
-        padding: 10px;
-      }
-      .back-link {
-        font-size: 14px;
-      }
     }
   </style>
 </head>
@@ -111,6 +96,7 @@
     </thead>
     <tbody id="status-table-body"></tbody>
   </table>
+
   <h2>📋 Report a Machine</h2>
   <form class="form-container" onsubmit="submitForm(event)">
     <select id="company" onchange="filterLocations()" required>
@@ -135,7 +121,14 @@
     <button type="submit">Submit Report</button>
     <div class="thank-you" id="thankYouMessage">Thank you! Your report was received. 🎉</div>
   </form>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>
+    const supabase = supabase.createClient(
+      "https://uhokqclbxoevlxrzeinf.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk"
+    );
+
     const locationsByCompany = {
       "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
       "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch", "Dowdeswell St Branch", "Rawson Square Branch", "Thompson Blvd Branch", "Wulff Rd Branch", "Soldier Rd ATM"],
@@ -144,29 +137,43 @@
       "CIBC FirstCaribbean": ["JFK Drive Branch", "Sandyport Branch", "Shirley Street Head Branch", "Thompson Blvd Branch", "Carmichael Branch", "Harbour Bay Branch", "Marathon Road Branch"],
       "Island Pay": ["Café Johnny Canoe – Cable Beach", "Commonwealth Supplies SW Plaza", "Commonwealth Supplies PRO Store – Robinson Rd", "Esso Bargain City – Carmichael Rd", "Kenneth's Food Store – Prince Charles Dr", "LPIA Customs Arrival Lounge", "LPIA Domestic Departure", "TAR National Stadium", "Quality Home Centre – Carmichael", "Quality Home Centre – Prince Charles"]
     };
+
     let latestReports = [];
-    function submitForm(event) {
+
+    async function submitForm(event) {
       event.preventDefault();
       const company = document.getElementById("company").value;
       const location = document.getElementById("location").value;
       const status = document.getElementById("status").value;
       const name = document.getElementById("name").value;
       const phone = document.getElementById("phone").value;
+
       if (name && !phone) {
         alert("Please enter your phone number if you provide your name.");
         return;
       }
+
       latestReports = latestReports.filter(r => !(r.company === company && r.location === location));
       latestReports.push({ company, location, status, time: new Date().toLocaleTimeString() });
+
+      const { error } = await supabase.from("reports").insert({ name, phone, company, location, status });
+      if (error) {
+        alert("Failed to save report.");
+        return;
+      }
+
       document.getElementById("thankYouMessage").style.display = 'block';
       setTimeout(() => {
         document.getElementById("thankYouMessage").style.display = 'none';
       }, 5000);
+
       event.target.reset();
+
       if (document.getElementById("companyFilter").value === company) {
         filterStatusTable();
       }
     }
+
     function filterLocations() {
       const company = document.getElementById("company").value;
       const locationSelect = document.getElementById("location");
@@ -178,10 +185,12 @@
         locationSelect.appendChild(option);
       });
     }
+
     function filterStatusTable() {
       const selectedCompany = document.getElementById("companyFilter").value;
       const tbody = document.getElementById("status-table-body");
       tbody.innerHTML = "";
+
       const locations = locationsByCompany[selectedCompany] || [];
       locations.forEach(location => {
         const report = latestReports.find(r => r.company === selectedCompany && r.location === location);
@@ -214,6 +223,7 @@
         tbody.appendChild(tr);
       });
     }
+
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("companyFilter").value = "WeChangeUp";
       filterStatusTable();
