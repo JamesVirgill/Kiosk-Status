@@ -190,7 +190,6 @@
       const selectedCompany = document.getElementById("companyFilter").value;
       const tbody = document.getElementById("status-table-body");
       tbody.innerHTML = "";
-      console.log("Rendering status table for:", selectedCompany);
 
       const locations = locationsByCompany[selectedCompany] || [];
       locations.forEach(location => {
@@ -243,6 +242,17 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("companyFilter").value = "WeChangeUp";
+      // Force default reports for WeChangeUp on load
+      if (latestReports.length === 0) {
+        locationsByCompany["WeChangeUp"].forEach(location => {
+          latestReports.push({
+            company: "WeChangeUp",
+            location: location,
+            status: "Yes",
+            time: "Just now"
+          });
+        });
+      }
       filterStatusTable();
     });
   </script>
