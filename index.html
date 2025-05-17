@@ -213,6 +213,22 @@
           symbol = "🟢";
           timeText = "Just now";
         }
+          const reportDate = new Date();
+          const timeParts = report.time.split(":");
+          reportDate.setHours(timeParts[0], timeParts[1], 0);
+          const twoHoursAgo = new Date();
+          twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+          if (selectedCompany === "WeChangeUp" && report.status === "Yes" && reportDate < twoHoursAgo) {
+            symbol = "🟢";
+            timeText = "Just now";
+          } else {
+            symbol = report.status === "Yes" ? "🟢" : "🔴";
+            timeText = `Reported at ${report.time}`;
+          }
+        } else if (selectedCompany === "WeChangeUp") {
+          symbol = "🟢";
+          timeText = "Just now";
+        }
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${selectedCompany}</td>
