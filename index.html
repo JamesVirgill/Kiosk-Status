@@ -147,6 +147,16 @@
     };
 
     let latestReports = [];
+if (latestReports.length === 0) {
+  locationsByCompany["WeChangeUp"].forEach(location => {
+    latestReports.push({
+      company: "WeChangeUp",
+      location: location,
+      status: "Yes",
+      time: "Just now"
+    });
+  });
+}
 
     async function submitForm(event) {
       event.preventDefault();
@@ -264,16 +274,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("companyFilter").value = "WeChangeUp";
-      if (latestReports.length === 0) {
-        locationsByCompany["WeChangeUp"].forEach(location => {
-          latestReports.push({
-            company: "WeChangeUp",
-            location: location,
-            status: "Yes",
-            time: "Just now"
-          });
-        });
-      }
       // Force default reports for WeChangeUp on load
       if (latestReports.length === 0) {
         locationsByCompany["WeChangeUp"].forEach(location => {
