@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WeChangeUp Kiosk Status</title>
+  <title>WeChangeUp Status Tracker</title>
   <style>
     body {
       font-family: sans-serif;
@@ -74,7 +74,6 @@
         return;
       }
       const data = await res.json();
-      console.log("✅ Loaded reports:", data);
       latestReports = [];
 
       const seen = new Set();
@@ -116,7 +115,6 @@
       const location = document.getElementById("location").value;
       const status = document.getElementById("status").value;
 
-      console.log("📤 Submitting:", { location, status });
       const res = await fetch(`${SUPABASE_URL}/rest/v1/reports`, {
         method: "POST",
         headers: {
