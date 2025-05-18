@@ -298,6 +298,7 @@
   window.onload = async () => {
     await loadReportsFromSupabase();
     filterLocations();
+    filterStatusTable();
     document.getElementById("companyFilter").value = "WeChangeUp";
     filterStatusTable();
   };
