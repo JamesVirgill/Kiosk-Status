@@ -235,6 +235,25 @@
           } else {
             timeText = `Reported at ${report.time}`;
           }
+        } else if (selectedCompany === "WeChangeUp") {
+          symbol = "🟢";
+          timeText = "Just now";
+
+          const age = now - report.timestamp;
+
+          if (report.status === "Yes") {
+            symbol = "🟢";
+          } else {
+            symbol = "🔴";
+          }
+
+          if (selectedCompany === "WeChangeUp" && age > WECHANGEUP_THRESHOLD) {
+            report.timestamp = now;
+            report.time = "Just now";
+            timeText = "Just now";
+          } else {
+            timeText = `Reported at ${report.time}`;
+          }
         }
 
         const tr = document.createElement("tr");
