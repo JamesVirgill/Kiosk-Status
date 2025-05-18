@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -155,10 +156,14 @@
       const name = document.getElementById("name").value;
       const phone = document.getElementById("phone").value;
 
-      console.log({ company, location, status, name, phone });
-
       latestReports = latestReports.filter(r => !(r.company === company && r.location === location));
-      latestReports.push({ company, location, status, time: new Date().toLocaleTimeString() });
+      latestReports.push({
+        company,
+        location,
+        status,
+        time: new Date().toLocaleTimeString(),
+        timestamp: Date.now()
+      });
 
       document.getElementById("thankYouMessage").style.display = 'block';
       setTimeout(() => {
@@ -166,7 +171,6 @@
       }, 5000);
 
       event.target.reset();
-
       if (document.getElementById("companyFilter").value === company) {
         filterStatusTable();
       }
@@ -198,6 +202,9 @@
       const tbody = document.getElementById("status-table-body");
       tbody.innerHTML = "";
 
+      const now = Date.now();
+      const WECHANGEUP_THRESHOLD = 4 * 60 * 60 * 1000; // 4 hours
+
       const locationsByCompany = {
         "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
         "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch", "Dowdeswell St Branch", "Rawson Square Branch", "Thompson Blvd Branch", "Wulff Rd Branch", "Soldier Rd ATM"],
@@ -209,18 +216,25 @@
 
       (locationsByCompany[selectedCompany] || []).forEach(location => {
         const report = latestReports.find(r => r.company === selectedCompany && r.location === location);
-
         let symbol = "<span style='color:#ccc'>Unknown</span>";
         let timeText = "No recent reports";
+
         if (report) {
+          const age = now - report.timestamp;
+
           if (report.status === "Yes") {
             symbol = "🟢";
           } else {
             symbol = "🔴";
           }
-          timeText = `Reported at ${report.time}`;
-        } else if (selectedCompany === "WeChangeUp") {
-          symbol = "🟢";
+
+          if (selectedCompany === "WeChangeUp" && age > WECHANGEUP_THRESHOLD) {
+            report.timestamp = now;
+            report.time = "Just now";
+            timeText = "Just now";
+          } else {
+            timeText = `Reported at ${report.time}`;
+          }
         }
 
         const tr = document.createElement("tr");
