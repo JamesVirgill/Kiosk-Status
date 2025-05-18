@@ -148,6 +148,50 @@
 <script>
   let latestReports = [];
 
+  const SUPABASE_URL = 'https://uhokqclbxoevlxrzeinf.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk';
+
+  async function saveToSupabase(data) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reports`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) {
+      console.error('Failed to store report:', await res.text());
+    }
+  }
+
+  async function loadReportsFromSupabase() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/reports?select=*`, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      latestReports = data.map(r => ({
+        company: r.company,
+        location: r.location,
+        status: r.status,
+        name: r.name,
+        phone: r.phone,
+        time: new Date(r.timestamp).toLocaleTimeString(),
+        timestamp: new Date(r.timestamp).getTime()
+      }));
+    } else {
+      console.error("Failed to load reports:", await res.text());
+    }
+  }
+
+
   function submitForm(event) {
     event.preventDefault();
     const company = document.getElementById("company").value;
@@ -158,6 +202,8 @@
 
     latestReports = latestReports.filter(r => !(r.company === company && r.location === location));
     latestReports.push({
+    // Save to Supabase
+    saveToSupabase({ company, location, status, name, phone });
       company,
       location,
       status,
@@ -251,37 +297,10 @@
   }
 
   window.onload = async () => {
-  await loadReportsFromSupabase();
+    await loadReportsFromSupabase();
     document.getElementById("companyFilter").value = "WeChangeUp";
     filterStatusTable();
   };
-
-
-
-async function loadReportsFromSupabase() {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/reports?select=*`, {
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`
-    }
-  });
-
-  if (res.ok) {
-    const data = await res.json();
-    latestReports = data.map(r => ({
-      company: r.company,
-      location: r.location,
-      status: r.status,
-      name: r.name,
-      phone: r.phone,
-      time: new Date(r.timestamp).toLocaleTimeString(),
-      timestamp: new Date(r.timestamp).getTime()
-    }));
-  } else {
-    console.error("Failed to load reports:", await res.text());
-  }
-}
-
 </script>
 
 </body>
