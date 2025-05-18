@@ -2,143 +2,259 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WeChangeUp Status Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Machine Status Checker</title>
   <style>
     body {
+      margin: 0;
       font-family: sans-serif;
-      background: #111;
+      background-color: #111;
       color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       padding: 20px;
+    }
+    a.back-link {
+      align-self: flex-start;
+      margin-bottom: 10px;
+      color: #0f0;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    a.back-link:hover {
+      text-decoration: underline;
+    }
+    h1, h2 {
+      text-align: center;
     }
     .status-table {
       width: 100%;
       max-width: 600px;
+      margin-bottom: 40px;
       border-collapse: collapse;
-      margin-top: 20px;
     }
     .status-table th, .status-table td {
       border: 1px solid #444;
       padding: 10px;
       text-align: center;
     }
+    .form-container {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    select, button, input {
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+    }
+    select, input {
+      background-color: #222;
+      color: #fff;
+    }
+    button {
+      background-color: #0f0;
+      color: #000;
+      font-weight: bold;
+    }
+    .thank-you {
+      margin-top: 20px;
+      color: #0f0;
+      font-weight: bold;
+      display: none;
+    }
+    @media (max-width: 600px) {
+      .status-table, .form-container {
+        width: 100%;
+      }
+      .status-table th, .status-table td {
+        padding: 8px;
+        font-size: 14px;
+      }
+      select, input, button {
+        font-size: 16px;
+      }
+      body {
+        padding: 10px;
+      }
+      .back-link {
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>WeChangeUp Machine Status</h1>
+  <a href="https://wechangeup.net/" class="back-link">← Back to WeChangeUp.net</a>
+  <h1>🟢 Machine Status Check & Report</h1>
+
+  <h2>Current Status</h2>
+  <label for="companyFilter">Filter by Company:</label>
+  <select id="companyFilter" onchange="filterStatusTable()">
+    <option value="WeChangeUp">WeChangeUp</option>
+    <option value="Scotiabank">Scotiabank</option>
+    <option value="RBC Royal Bank">RBC Royal Bank</option>
+    <option value="Commonwealth Bank">Commonwealth Bank</option>
+    <option value="CIBC FirstCaribbean">CIBC FirstCaribbean</option>
+    <option value="Island Pay">Island Pay</option>
+  </select>
 
   <table class="status-table">
     <thead>
       <tr>
+        <th>Company</th>
         <th>Location</th>
         <th>Status</th>
         <th>Last Report</th>
       </tr>
     </thead>
-    <tbody id="status-table-body"></tbody>
+    <tbody id="status-table-body">
+    </tbody>
   </table>
 
-  <h2>Submit a Report</h2>
-  <form onsubmit="submitForm(event)">
-    <select id="location" required>
-      <option value="">Select a Location</option>
-      <option>Smitty's Sandyport</option>
-      <option>Quality Home Center Carmichael</option>
-      <option>Quality Home Center Prince Charles</option>
-      <option>Rubis East St and Soldier Rd</option>
+  <h2>📋 Report a Machine</h2>
+  <form class="form-container" onsubmit="submitForm(event)">
+    <select id="company" onchange="filterLocations()" required>
+      <option value="">Which company?</option>
+      <option value="WeChangeUp">WeChangeUp</option>
+      <option value="Scotiabank">Scotiabank</option>
+      <option value="RBC Royal Bank">RBC Royal Bank</option>
+      <option value="Commonwealth Bank">Commonwealth Bank</option>
+      <option value="CIBC FirstCaribbean">CIBC FirstCaribbean</option>
+      <option value="Island Pay">Island Pay</option>
     </select>
+
+    <select id="location" required>
+      <option value="">Which location?</option>
+    </select>
+
     <select id="status" required>
       <option value="">Was it working?</option>
       <option value="Yes">Yes</option>
       <option value="No">No</option>
     </select>
+
+    <input type="text" id="name" placeholder="Your name (optional for prize)" />
+    <input type="text" id="phone" placeholder="Phone number (optional)" />
+
     <button type="submit">Submit Report</button>
+    <div class="thank-you" id="thankYouMessage">Thank you! Your report was received. 🎉</div>
   </form>
 
-  <script>
-    const SUPABASE_URL = 'https://uhokqclbxoevlxrzeinf.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk';
-    const LOCATIONS = ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"];
-    const table = document.getElementById("status-table-body");
-    let latestReports = [];
+  
+<script>
+  let latestReports = [];
 
-    async function loadReports() {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/reports?select=*&company=eq.WeChangeUp&order=timestamp.desc`, {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`
-        }
-      });
-      if (!res.ok) {
-        console.error("❌ Failed to fetch reports:", await res.text());
-        return;
-      }
-      const data = await res.json();
-      latestReports = [];
+  function submitForm(event) {
+    event.preventDefault();
+    const company = document.getElementById("company").value;
+    const location = document.getElementById("location").value;
+    const status = document.getElementById("status").value;
+    const name = document.getElementById("name").value;
+    const phone = document.getElementById("phone").value;
 
-      const seen = new Set();
-      for (const r of data) {
-        if (!seen.has(r.location)) {
-          seen.add(r.location);
-          latestReports.push(r);
-        }
-      }
-      renderTable();
+    latestReports = latestReports.filter(r => !(r.company === company && r.location === location));
+    latestReports.push({
+      company,
+      location,
+      status,
+      time: new Date().toLocaleTimeString(),
+      timestamp: Date.now()
+    });
+
+    document.getElementById("thankYouMessage").style.display = 'block';
+    setTimeout(() => {
+      document.getElementById("thankYouMessage").style.display = 'none';
+    }, 5000);
+
+    event.target.reset();
+    if (document.getElementById("companyFilter").value === company) {
+      filterStatusTable();
     }
+  }
 
-    function renderTable() {
-      const now = Date.now();
-      const cutoff = 4 * 60 * 60 * 1000;
-      table.innerHTML = "";
+  function filterLocations() {
+    const locationsByCompany = {
+      "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
+      "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch", "Dowdeswell St Branch", "Rawson Square Branch", "Thompson Blvd Branch", "Wulff Rd Branch", "Soldier Rd ATM"],
+      "RBC Royal Bank": ["RoyalStar Assurance – JFK Drive", "Chapter One Bookstore", "West Bay Street Branch", "Shirley Street Branch", "Bay Street Branch", "Madeira Street Branch", "Nassau Central Branch", "SouthWest Plaza Branch", "Prince Charles Branch", "Royal Bank House (Head Office)"],
+      "Commonwealth Bank": ["Blue Hill Road", "Cable Beach", "Town Centre Mall", "Robinson Road", "East Bay Street", "Head Office – Mackey St", "Wulff Road"],
+      "CIBC FirstCaribbean": ["JFK Drive Branch", "Sandyport Branch", "Shirley Street Head Branch", "Thompson Blvd Branch", "Carmichael Branch", "Harbour Bay Branch", "Marathon Road Branch"],
+      "Island Pay": ["Café Johnny Canoe – Cable Beach", "Commonwealth Supplies SW Plaza", "Commonwealth Supplies PRO Store – Robinson Rd", "Esso Bargain City – Carmichael Rd", "Kenneth's Food Store – Prince Charles Dr", "LPIA Customs Arrival Lounge", "LPIA Domestic Departure", "TAR National Stadium", "Quality Home Centre – Carmichael", "Quality Home Centre – Prince Charles"]
+    };
 
-      LOCATIONS.forEach(loc => {
-        const report = latestReports.find(r => r.location === loc);
-        let symbol = "🟢";
-        let time = "Just now";
+    const company = document.getElementById("company").value;
+    const locationSelect = document.getElementById("location");
+    locationSelect.innerHTML = '<option value="">Which location?</option>';
+    (locationsByCompany[company] || []).forEach(loc => {
+      const option = document.createElement("option");
+      option.value = loc;
+      option.textContent = loc;
+      locationSelect.appendChild(option);
+    });
+  }
 
-        if (report) {
-          const age = now - new Date(report.timestamp).getTime();
-          if (report.status === "No") symbol = "🔴";
-          if (age <= cutoff) {
-            time = new Date(report.timestamp).toLocaleTimeString();
-          }
+  function filterStatusTable() {
+    const selectedCompany = document.getElementById("companyFilter").value;
+    const tbody = document.getElementById("status-table-body");
+    tbody.innerHTML = "";
+
+    const now = Date.now();
+    const WECHANGEUP_THRESHOLD = 4 * 60 * 60 * 1000; // 4 hours
+
+    const locationsByCompany = {
+      "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
+      "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch", "Dowdeswell St Branch", "Rawson Square Branch", "Thompson Blvd Branch", "Wulff Rd Branch", "Soldier Rd ATM"],
+      "RBC Royal Bank": ["RoyalStar Assurance – JFK Drive", "Chapter One Bookstore", "West Bay Street Branch", "Shirley Street Branch", "Bay Street Branch", "Madeira Street Branch", "Nassau Central Branch", "SouthWest Plaza Branch", "Prince Charles Branch", "Royal Bank House (Head Office)"],
+      "Commonwealth Bank": ["Blue Hill Road", "Cable Beach", "Town Centre Mall", "Robinson Road", "East Bay Street", "Head Office – Mackey St", "Wulff Road"],
+      "CIBC FirstCaribbean": ["JFK Drive Branch", "Sandyport Branch", "Shirley Street Head Branch", "Thompson Blvd Branch", "Carmichael Branch", "Harbour Bay Branch", "Marathon Road Branch"],
+      "Island Pay": ["Café Johnny Canoe – Cable Beach", "Commonwealth Supplies SW Plaza", "Commonwealth Supplies PRO Store – Robinson Rd", "Esso Bargain City – Carmichael Rd", "Kenneth's Food Store – Prince Charles Dr", "LPIA Customs Arrival Lounge", "LPIA Domestic Departure", "TAR National Stadium", "Quality Home Centre – Carmichael", "Quality Home Centre – Prince Charles"]
+    };
+
+    (locationsByCompany[selectedCompany] || []).forEach(location => {
+      const report = latestReports.find(r => r.company === selectedCompany && r.location === location);
+      let symbol = "<span style='color:#ccc'>Unknown</span>";
+      let timeText = "No recent reports";
+
+      if (report) {
+        const age = now - report.timestamp;
+        if (report.status === "Yes") {
+          symbol = "🟢";
+        } else {
+          symbol = "🔴";
         }
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${loc}</td><td style="font-size:20px">${symbol}</td><td>${time}</td>`;
-        table.appendChild(tr);
-      });
-    }
-
-    async function submitForm(e) {
-      e.preventDefault();
-      const location = document.getElementById("location").value;
-      const status = document.getElementById("status").value;
-
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/reports`, {
-        method: "POST",
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-          "Content-Type": "application/json",
-          Prefer: "return=representation"
-        },
-        body: JSON.stringify({
-          company: "WeChangeUp",
-          location,
-          status
-        })
-      });
-
-      if (res.ok) {
-        console.log("✅ Report submitted");
-        await loadReports();
-      } else {
-        console.error("❌ Submission failed:", await res.text());
+        if (selectedCompany === "WeChangeUp" && age > WECHANGEUP_THRESHOLD) {
+          report.timestamp = now;
+          report.time = "Just now";
+          timeText = "Just now";
+        } else {
+          timeText = `Reported at ${report.time}`;
+        }
+      } else if (selectedCompany === "WeChangeUp") {
+        symbol = "🟢";
+        timeText = "Just now";
       }
-    }
 
-    loadReports();
-  </script>
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${selectedCompany}</td>
+        <td>${location}</td>
+        <td style="font-size: 20px">${symbol}</td>
+        <td>${timeText}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  window.onload = () => {
+    document.getElementById("companyFilter").value = "WeChangeUp";
+    filterStatusTable();
+  };
+</script>
+
 </body>
 </html>
