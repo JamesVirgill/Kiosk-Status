@@ -132,8 +132,10 @@
       });
 
       if (res.ok) {
-        console.log("✅ Submitted report for", company, location, status);
-        await loadReports();
+        const submitted = await res.json();
+        latestReports = latestReports.filter(r => !(r.company === company && r.location === location));
+        latestReports.unshift(submitted[0]);
+        renderTable();
       } else {
         console.error("❌ Failed to submit:", await res.text());
       }
