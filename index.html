@@ -92,6 +92,7 @@
   <h1>🟢 Machine Status Check & Report</h1>
 
   <h2>Current Status</h2>
+  <div id="loadingStatus" style="color:#0f0; margin-bottom:10px;">Loading machine status...</div>
   <label for="companyFilter">Filter by Company:</label>
   <select id="companyFilter" onchange="filterStatusTable()">
     <option value="WeChangeUp">WeChangeUp</option>
@@ -218,7 +219,8 @@
 
     event.target.reset();
     if (document.getElementById("companyFilter").value === company) {
-      filterStatusTable();
+      document.getElementById("loadingStatus").style.display = "none";
+  filterStatusTable();
     }
   }
 
@@ -297,9 +299,11 @@
   }
 
   window.onload = async () => {
+    document.getElementById("companyFilter").value = "WeChangeUp";
     await loadReportsFromSupabase();
     document.getElementById("companyFilter").value = "WeChangeUp";
-    filterStatusTable();
+    document.getElementById("loadingStatus").style.display = "none";
+  filterStatusTable();
   };
 </script>
 
