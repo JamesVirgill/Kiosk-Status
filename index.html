@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -145,132 +144,117 @@
     <div class="thank-you" id="thankYouMessage">Thank you! Your report was received. 🎉</div>
   </form>
 
-  <script>
-    let latestReports = [];
+  
+<script>
+  let latestReports = [];
 
-    function submitForm(event) {
-      event.preventDefault();
-      const company = document.getElementById("company").value;
-      const location = document.getElementById("location").value;
-      const status = document.getElementById("status").value;
-      const name = document.getElementById("name").value;
-      const phone = document.getElementById("phone").value;
+  function submitForm(event) {
+    event.preventDefault();
+    const company = document.getElementById("company").value;
+    const location = document.getElementById("location").value;
+    const status = document.getElementById("status").value;
+    const name = document.getElementById("name").value;
+    const phone = document.getElementById("phone").value;
 
-      latestReports = latestReports.filter(r => !(r.company === company && r.location === location));
-      latestReports.push({
-        company,
-        location,
-        status,
-        time: new Date().toLocaleTimeString(),
-        timestamp: Date.now()
-      });
+    latestReports = latestReports.filter(r => !(r.company === company && r.location === location));
+    latestReports.push({
+      company,
+      location,
+      status,
+      time: new Date().toLocaleTimeString(),
+      timestamp: Date.now()
+    });
 
-      document.getElementById("thankYouMessage").style.display = 'block';
-      setTimeout(() => {
-        document.getElementById("thankYouMessage").style.display = 'none';
-      }, 5000);
+    document.getElementById("thankYouMessage").style.display = 'block';
+    setTimeout(() => {
+      document.getElementById("thankYouMessage").style.display = 'none';
+    }, 5000);
 
-      event.target.reset();
-      if (document.getElementById("companyFilter").value === company) {
-        filterStatusTable();
-      }
+    event.target.reset();
+    if (document.getElementById("companyFilter").value === company) {
+      filterStatusTable();
     }
+  }
 
-    function filterLocations() {
-      const locationsByCompany = {
-        "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
-        "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch", "Dowdeswell St Branch", "Rawson Square Branch", "Thompson Blvd Branch", "Wulff Rd Branch", "Soldier Rd ATM"],
-        "RBC Royal Bank": ["RoyalStar Assurance – JFK Drive", "Chapter One Bookstore", "West Bay Street Branch", "Shirley Street Branch", "Bay Street Branch", "Madeira Street Branch", "Nassau Central Branch", "SouthWest Plaza Branch", "Prince Charles Branch", "Royal Bank House (Head Office)"],
-        "Commonwealth Bank": ["Blue Hill Road", "Cable Beach", "Town Centre Mall", "Robinson Road", "East Bay Street", "Head Office – Mackey St", "Wulff Road"],
-        "CIBC FirstCaribbean": ["JFK Drive Branch", "Sandyport Branch", "Shirley Street Head Branch", "Thompson Blvd Branch", "Carmichael Branch", "Harbour Bay Branch", "Marathon Road Branch"],
-        "Island Pay": ["Café Johnny Canoe – Cable Beach", "Commonwealth Supplies SW Plaza", "Commonwealth Supplies PRO Store – Robinson Rd", "Esso Bargain City – Carmichael Rd", "Kenneth's Food Store – Prince Charles Dr", "LPIA Customs Arrival Lounge", "LPIA Domestic Departure", "TAR National Stadium", "Quality Home Centre – Carmichael", "Quality Home Centre – Prince Charles"]
-      };
+  function filterLocations() {
+    const locationsByCompany = {
+      "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
+      "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch", "Dowdeswell St Branch", "Rawson Square Branch", "Thompson Blvd Branch", "Wulff Rd Branch", "Soldier Rd ATM"],
+      "RBC Royal Bank": ["RoyalStar Assurance – JFK Drive", "Chapter One Bookstore", "West Bay Street Branch", "Shirley Street Branch", "Bay Street Branch", "Madeira Street Branch", "Nassau Central Branch", "SouthWest Plaza Branch", "Prince Charles Branch", "Royal Bank House (Head Office)"],
+      "Commonwealth Bank": ["Blue Hill Road", "Cable Beach", "Town Centre Mall", "Robinson Road", "East Bay Street", "Head Office – Mackey St", "Wulff Road"],
+      "CIBC FirstCaribbean": ["JFK Drive Branch", "Sandyport Branch", "Shirley Street Head Branch", "Thompson Blvd Branch", "Carmichael Branch", "Harbour Bay Branch", "Marathon Road Branch"],
+      "Island Pay": ["Café Johnny Canoe – Cable Beach", "Commonwealth Supplies SW Plaza", "Commonwealth Supplies PRO Store – Robinson Rd", "Esso Bargain City – Carmichael Rd", "Kenneth's Food Store – Prince Charles Dr", "LPIA Customs Arrival Lounge", "LPIA Domestic Departure", "TAR National Stadium", "Quality Home Centre – Carmichael", "Quality Home Centre – Prince Charles"]
+    };
 
-      const company = document.getElementById("company").value;
-      const locationSelect = document.getElementById("location");
-      locationSelect.innerHTML = '<option value="">Which location?</option>';
-      (locationsByCompany[company] || []).forEach(loc => {
-        const option = document.createElement("option");
-        option.value = loc;
-        option.textContent = loc;
-        locationSelect.appendChild(option);
-      });
-    }
+    const company = document.getElementById("company").value;
+    const locationSelect = document.getElementById("location");
+    locationSelect.innerHTML = '<option value="">Which location?</option>';
+    (locationsByCompany[company] || []).forEach(loc => {
+      const option = document.createElement("option");
+      option.value = loc;
+      option.textContent = loc;
+      locationSelect.appendChild(option);
+    });
+  }
 
-    function filterStatusTable() {
-      const selectedCompany = document.getElementById("companyFilter").value;
-      const tbody = document.getElementById("status-table-body");
-      tbody.innerHTML = "";
+  function filterStatusTable() {
+    const selectedCompany = document.getElementById("companyFilter").value;
+    const tbody = document.getElementById("status-table-body");
+    tbody.innerHTML = "";
 
-      const now = Date.now();
-      const WECHANGEUP_THRESHOLD = 4 * 60 * 60 * 1000; // 4 hours
+    const now = Date.now();
+    const WECHANGEUP_THRESHOLD = 4 * 60 * 60 * 1000; // 4 hours
 
-      const locationsByCompany = {
-        "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
-        "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch", "Dowdeswell St Branch", "Rawson Square Branch", "Thompson Blvd Branch", "Wulff Rd Branch", "Soldier Rd ATM"],
-        "RBC Royal Bank": ["RoyalStar Assurance – JFK Drive", "Chapter One Bookstore", "West Bay Street Branch", "Shirley Street Branch", "Bay Street Branch", "Madeira Street Branch", "Nassau Central Branch", "SouthWest Plaza Branch", "Prince Charles Branch", "Royal Bank House (Head Office)"],
-        "Commonwealth Bank": ["Blue Hill Road", "Cable Beach", "Town Centre Mall", "Robinson Road", "East Bay Street", "Head Office – Mackey St", "Wulff Road"],
-        "CIBC FirstCaribbean": ["JFK Drive Branch", "Sandyport Branch", "Shirley Street Head Branch", "Thompson Blvd Branch", "Carmichael Branch", "Harbour Bay Branch", "Marathon Road Branch"],
-        "Island Pay": ["Café Johnny Canoe – Cable Beach", "Commonwealth Supplies SW Plaza", "Commonwealth Supplies PRO Store – Robinson Rd", "Esso Bargain City – Carmichael Rd", "Kenneth's Food Store – Prince Charles Dr", "LPIA Customs Arrival Lounge", "LPIA Domestic Departure", "TAR National Stadium", "Quality Home Centre – Carmichael", "Quality Home Centre – Prince Charles"]
-      };
+    const locationsByCompany = {
+      "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
+      "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch", "Dowdeswell St Branch", "Rawson Square Branch", "Thompson Blvd Branch", "Wulff Rd Branch", "Soldier Rd ATM"],
+      "RBC Royal Bank": ["RoyalStar Assurance – JFK Drive", "Chapter One Bookstore", "West Bay Street Branch", "Shirley Street Branch", "Bay Street Branch", "Madeira Street Branch", "Nassau Central Branch", "SouthWest Plaza Branch", "Prince Charles Branch", "Royal Bank House (Head Office)"],
+      "Commonwealth Bank": ["Blue Hill Road", "Cable Beach", "Town Centre Mall", "Robinson Road", "East Bay Street", "Head Office – Mackey St", "Wulff Road"],
+      "CIBC FirstCaribbean": ["JFK Drive Branch", "Sandyport Branch", "Shirley Street Head Branch", "Thompson Blvd Branch", "Carmichael Branch", "Harbour Bay Branch", "Marathon Road Branch"],
+      "Island Pay": ["Café Johnny Canoe – Cable Beach", "Commonwealth Supplies SW Plaza", "Commonwealth Supplies PRO Store – Robinson Rd", "Esso Bargain City – Carmichael Rd", "Kenneth's Food Store – Prince Charles Dr", "LPIA Customs Arrival Lounge", "LPIA Domestic Departure", "TAR National Stadium", "Quality Home Centre – Carmichael", "Quality Home Centre – Prince Charles"]
+    };
 
-      (locationsByCompany[selectedCompany] || []).forEach(location => {
-        const report = latestReports.find(r => r.company === selectedCompany && r.location === location);
-        let symbol = "<span style='color:#ccc'>Unknown</span>";
-        let timeText = "No recent reports";
+    (locationsByCompany[selectedCompany] || []).forEach(location => {
+      const report = latestReports.find(r => r.company === selectedCompany && r.location === location);
+      let symbol = "<span style='color:#ccc'>Unknown</span>";
+      let timeText = "No recent reports";
 
-        if (report) {
-          const age = now - report.timestamp;
-
-          if (report.status === "Yes") {
-            symbol = "🟢";
-          } else {
-            symbol = "🔴";
-          }
-
-          if (selectedCompany === "WeChangeUp" && age > WECHANGEUP_THRESHOLD) {
-            report.timestamp = now;
-            report.time = "Just now";
-            timeText = "Just now";
-          } else {
-            timeText = `Reported at ${report.time}`;
-          }
-        } else if (selectedCompany === "WeChangeUp") {
+      if (report) {
+        const age = now - report.timestamp;
+        if (report.status === "Yes") {
           symbol = "🟢";
-          timeText = "Just now";
-
-          const age = now - report.timestamp;
-
-          if (report.status === "Yes") {
-            symbol = "🟢";
-          } else {
-            symbol = "🔴";
-          }
-
-          if (selectedCompany === "WeChangeUp" && age > WECHANGEUP_THRESHOLD) {
-            report.timestamp = now;
-            report.time = "Just now";
-            timeText = "Just now";
-          } else {
-            timeText = `Reported at ${report.time}`;
-          }
+        } else {
+          symbol = "🔴";
         }
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${selectedCompany}</td>
-          <td>${location}</td>
-          <td style="font-size: 20px">${symbol}</td>
-          <td>${timeText}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+        if (selectedCompany === "WeChangeUp" && age > WECHANGEUP_THRESHOLD) {
+          report.timestamp = now;
+          report.time = "Just now";
+          timeText = "Just now";
+        } else {
+          timeText = `Reported at ${report.time}`;
+        }
+      } else if (selectedCompany === "WeChangeUp") {
+        symbol = "🟢";
+        timeText = "Just now";
+      }
 
-    window.onload = () => {
-      document.getElementById("companyFilter").value = "WeChangeUp";
-      filterStatusTable();
-    };
-  </script>
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${selectedCompany}</td>
+        <td>${location}</td>
+        <td style="font-size: 20px">${symbol}</td>
+        <td>${timeText}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  window.onload = () => {
+    document.getElementById("companyFilter").value = "WeChangeUp";
+    filterStatusTable();
+  };
+</script>
+
 </body>
 </html>
