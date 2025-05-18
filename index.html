@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>WeChangeUp Status Tracker</title>
+  <title>Kiosk Status Tracker</title>
   <style>
     body {
       font-family: sans-serif;
@@ -13,7 +13,7 @@
     }
     .status-table {
       width: 100%;
-      max-width: 600px;
+      max-width: 800px;
       border-collapse: collapse;
       margin-top: 20px;
     }
@@ -25,7 +25,10 @@
   </style>
 </head>
 <body>
-  <h1>WeChangeUp Machine Status</h1>
+  <h1>Kiosk Machine Status</h1>
+
+  <label for="companyFilter">Filter by Company:</label>
+  <select id="companyFilter" onchange="renderTable()"></select>
 
   <table class="status-table">
     <thead>
@@ -40,64 +43,61 @@
 
   <h2>Submit a Report</h2>
   <form onsubmit="submitForm(event)">
-    <select id="location" required>
-      <option value="">Select a Location</option>
-      <option>Smitty's Sandyport</option>
-      <option>Quality Home Center Carmichael</option>
-      <option>Quality Home Center Prince Charles</option>
-      <option>Rubis East St and Soldier Rd</option>
-    </select>
+    <select id="company" required onchange="updateLocationOptions()"></select>
+    <select id="location" required></select>
     <select id="status" required>
       <option value="">Was it working?</option>
       <option value="Yes">Yes</option>
       <option value="No">No</option>
     </select>
-    <button type="submit">Submit</button>
+    <button type="submit">Submit Report</button>
   </form>
 
   <script>
     const SUPABASE_URL = 'https://uhokqclbxoevlxrzeinf.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk';
-    const LOCATIONS = ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"];
-    const table = document.getElementById("status-table-body");
+    const LOCATIONS = {
+      "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
+      "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch"],
+      "RBC Royal Bank": ["RoyalStar Assurance – JFK Drive", "Chapter One Bookstore"],
+      "Commonwealth Bank": ["Blue Hill Road", "Cable Beach"],
+      "CIBC FirstCaribbean": ["JFK Drive Branch", "Sandyport Branch"],
+      "Island Pay": ["Johnny Canoe", "TAR National Stadium"]
+    };
+    const statusTable = document.getElementById("status-table-body");
     let latestReports = [];
 
     async function loadReports() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/reports?select=*&company=eq.WeChangeUp&order=timestamp.desc`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/reports?select=*&order=timestamp.desc`, {
           headers: {
             apikey: SUPABASE_KEY,
             Authorization: `Bearer ${SUPABASE_KEY}`
           }
         });
-        if (!res.ok) throw new Error(await res.text());
-
         const data = await res.json();
-        const seen = new Set();
-        latestReports = [];
-
-        for (const r of data) {
-          if (!seen.has(r.location)) {
-            seen.add(r.location);
-            latestReports.push(r);
+        const map = new Map();
+        for (const row of data) {
+          const key = row.company + "::" + row.location;
+          if (!map.has(key)) {
+            map.set(key, row);
           }
         }
-
-        console.log("✅ Loaded reports:", latestReports);
+        latestReports = Array.from(map.values());
+        renderTable();
       } catch (err) {
-        console.error("❌ Failed to fetch reports:", err);
-        latestReports = []; // fallback to empty
+        console.error("❌ Load error:", err);
       }
-      renderTable();
     }
 
     function renderTable() {
       const now = Date.now();
       const cutoff = 4 * 60 * 60 * 1000;
-      table.innerHTML = "";
+      const company = document.getElementById("companyFilter").value;
+      statusTable.innerHTML = "";
 
-      LOCATIONS.forEach(loc => {
-        const report = latestReports.find(r => r.location === loc);
+      (LOCATIONS[company] || []).forEach(loc => {
+        const report = latestReports.find(r => r.company === company && r.location === loc);
         let symbol = "🟢";
         let time = "Just now";
 
@@ -109,14 +109,14 @@
           }
         }
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${loc}</td><td style="font-size:20px">${symbol}</td><td>${time}</td>`;
-        table.appendChild(tr);
+        const row = `<tr><td>${loc}</td><td style="font-size:20px">${symbol}</td><td>${time}</td></tr>`;
+        statusTable.innerHTML += row;
       });
     }
 
     async function submitForm(e) {
       e.preventDefault();
+      const company = document.getElementById("company").value;
       const location = document.getElementById("location").value;
       const status = document.getElementById("status").value;
 
@@ -128,21 +128,44 @@
           "Content-Type": "application/json",
           Prefer: "return=representation"
         },
-        body: JSON.stringify({
-          company: "WeChangeUp",
-          location,
-          status
-        })
+        body: JSON.stringify({ company, location, status })
       });
 
       if (res.ok) {
-        console.log("✅ Report submitted");
+        console.log("✅ Submitted report for", company, location, status);
         await loadReports();
       } else {
-        console.error("❌ Submission failed:", await res.text());
+        console.error("❌ Failed to submit:", await res.text());
       }
     }
 
+    function updateLocationOptions() {
+      const company = document.getElementById("company").value;
+      const locSelect = document.getElementById("location");
+      locSelect.innerHTML = '<option value="">Select Location</option>';
+      (LOCATIONS[company] || []).forEach(loc => {
+        const opt = document.createElement("option");
+        opt.value = loc;
+        opt.textContent = loc;
+        locSelect.appendChild(opt);
+      });
+    }
+
+    function initDropdowns() {
+      const companySelects = [document.getElementById("company"), document.getElementById("companyFilter")];
+      for (const sel of companySelects) {
+        Object.keys(LOCATIONS).forEach(company => {
+          const opt = document.createElement("option");
+          opt.value = company;
+          opt.textContent = company;
+          sel.appendChild(opt);
+        });
+        sel.value = "WeChangeUp";
+      }
+      updateLocationOptions();
+    }
+
+    initDropdowns();
     loadReports();
   </script>
 </body>
