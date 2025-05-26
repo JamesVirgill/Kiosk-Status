@@ -39,66 +39,12 @@
         <th>Last Report</th>
       </tr>
     </thead>
-    <tbody id="status-table-body"></tbody>
+    <tbody>
+      <tr><td>Smitty's Sandyport</td><td style="font-size: 20px">🟢</td><td>Just now</td></tr>
+      <tr><td>Quality Home Center Carmichael</td><td style="font-size: 20px">🟢</td><td>Just now</td></tr>
+      <tr><td>Quality Home Center Prince Charles</td><td style="font-size: 20px">🟢</td><td>Just now</td></tr>
+      <tr><td>Rubis East St and Soldier Rd</td><td style="font-size: 20px">🟢</td><td>Just now</td></tr>
+    </tbody>
   </table>
-
-  <script>
-    const SUPABASE_URL = 'https://uhokqclbxoevlxrzeinf.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk';
-
-    const LOCATIONS = [
-      "Smitty's Sandyport",
-      "Quality Home Center Carmichael",
-      "Quality Home Center Prince Charles",
-      "Rubis East St and Soldier Rd"
-    ];
-
-    async function loadReports() {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/reports?select=*&company=eq.WeChangeUp&order=timestamp.desc`, {
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`
-          }
-        });
-        const data = await res.json();
-        const map = new Map();
-        for (const row of data) {
-          if (!map.has(row.location)) {
-            map.set(row.location, row);
-          }
-        }
-        renderTable(map);
-      } catch (err) {
-        console.error("❌ Load error:", err);
-      }
-    }
-
-    function renderTable(reportsMap) {
-      const now = Date.now();
-      const cutoff = 4 * 60 * 60 * 1000;
-      const tbody = document.getElementById("status-table-body");
-      tbody.innerHTML = "";
-
-      LOCATIONS.forEach(loc => {
-        const report = reportsMap.get(loc);
-        let symbol = "🟢";
-        let time = "Just now";
-
-        if (report) {
-          const age = now - new Date(report.timestamp).getTime();
-          if (report.status === "No") symbol = "🔴";
-          if (age <= cutoff) {
-            time = new Date(report.timestamp).toLocaleTimeString();
-          }
-        }
-
-        const row = `<tr><td>${loc}</td><td style="font-size:20px">${symbol}</td><td>${time}</td></tr>`;
-        tbody.innerHTML += row;
-      });
-    }
-
-    loadReports();
-  </script>
 </body>
 </html>
