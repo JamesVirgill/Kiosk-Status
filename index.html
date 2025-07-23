@@ -29,6 +29,10 @@
     h1, h2 {
       text-align: center;
     }
+    .last-updated {
+      margin-bottom: 10px;
+      color: #ccc;
+    }
     .status-table {
       width: 100%;
       max-width: 600px;
@@ -93,6 +97,7 @@
   <h1>🟢 Machine Status Check & Report</h1>
 
   <h2>Current Status</h2>
+  <div id="lastUpdated" class="last-updated">Last updated: —</div>
   <label for="companyFilter">Filter by Company:</label>
   <select id="companyFilter" onchange="filterStatusTable()">
     <option value="WeChangeUp">WeChangeUp</option>
@@ -164,10 +169,24 @@
       allReports = data.reduce((acc, row) => {
         const { location, status, company, processed_at_iso8601 } = row;
         if (!acc.some(r => r.location === location)) {
-          acc.push({ location, status, company, time: new Date(processed_at_iso8601).toLocaleString() });
+          acc.push({
+            location,
+            status,
+            company,
+            time: new Date(processed_at_iso8601).toLocaleString(),
+            rawTime: new Date(processed_at_iso8601).getTime()
+          });
         }
         return acc;
       }, []);
+
+      const lastUpdatedEl = document.getElementById('lastUpdated');
+      if (allReports.length > 0) {
+        const latest = new Date(allReports[0].rawTime);
+        lastUpdatedEl.textContent = `Last updated: ${latest.toLocaleString()}`;
+      } else {
+        lastUpdatedEl.textContent = `Last updated: —`;
+      }
 
       filterStatusTable();
     }
@@ -207,6 +226,9 @@
       const tbody = document.getElementById("status-table-body");
       tbody.innerHTML = "";
 
+      const now = Date.now();
+      const WECHANGEUP_THRESHOLD = 4 * 60 * 60 * 1000;
+
       const locationsByCompany = {
         "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
         "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch", "Dowdeswell St Branch", "Rawson Square Branch", "Thompson Blvd Branch", "Wulff Rd Branch", "Soldier Rd ATM"],
@@ -216,16 +238,13 @@
         "Island Pay": ["Café Johnny Canoe – Cable Beach", "Commonwealth Supplies SW Plaza", "Commonwealth Supplies PRO Store – Robinson Rd", "Esso Bargain City – Carmichael Rd", "Kenneth's Food Store – Prince Charles Dr", "LPIA Customs Arrival Lounge", "LPIA Domestic Departure", "TAR National Stadium", "Quality Home Centre – Carmichael", "Quality Home Centre – Prince Charles"]
       };
 
-      const now = Date.now();
-      const WECHANGEUP_THRESHOLD = 4 * 60 * 60 * 1000; // 4 hours
-
       (locationsByCompany[selectedCompany] || []).forEach(location => {
         const report = allReports.find(r => r.company === selectedCompany && r.location === location);
         let symbol = "<span style='color:#ccc'>Unknown</span>";
         let timeText = "No recent reports";
 
         if (report) {
-          const age = now - new Date(report.time).getTime();
+          const age = now - report.rawTime;
           symbol = report.status === "Yes" ? "🟢" : "🔴";
           timeText = selectedCompany === "WeChangeUp" && age > WECHANGEUP_THRESHOLD
             ? "Just now"
@@ -249,6 +268,7 @@
     window.onload = async () => {
       document.getElementById("companyFilter").value = "WeChangeUp";
       await loadStatusFromSupabase();
+      setInterval(loadStatusFromSupabase, 5 * 60 * 1000); // auto-refresh every 5 mins
     };
   </script>
 </body>
