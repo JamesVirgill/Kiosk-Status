@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kiosk Machine Status</title>
+  <title>Machine Status Checker</title>
   <script type="module" src="./supabaseClient.js"></script>
   <style>
     body {
@@ -16,28 +16,84 @@
       align-items: center;
       padding: 20px;
     }
-    table {
-      width: 100%;
-      max-width: 600px;
-      border-collapse: collapse;
-      margin-top: 20px;
+    a.back-link {
+      align-self: flex-start;
+      margin-bottom: 10px;
+      color: #0f0;
+      text-decoration: none;
+      font-weight: bold;
     }
-    th, td {
-      border: 1px solid #444;
-      padding: 12px;
+    a.back-link:hover {
+      text-decoration: underline;
+    }
+    h1, h2 {
       text-align: center;
     }
-    th {
-      background-color: #222;
+    .status-table {
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 40px;
+      border-collapse: collapse;
     }
-    .status {
-      font-size: 1.5rem;
+    .status-table th, .status-table td {
+      border: 1px solid #444;
+      padding: 10px;
+      text-align: center;
+    }
+    .form-container {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    select, button, input {
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+    }
+    select, input {
+      background-color: #222;
+      color: #fff;
+    }
+    button {
+      background-color: #0f0;
+      color: #000;
+      font-weight: bold;
+    }
+    .thank-you {
+      margin-top: 20px;
+      color: #0f0;
+      font-weight: bold;
+      display: none;
+    }
+    @media (max-width: 600px) {
+      .status-table, .form-container {
+        width: 100%;
+      }
+      .status-table th, .status-table td {
+        padding: 8px;
+        font-size: 14px;
+      }
+      select, input, button {
+        font-size: 16px;
+      }
+      body {
+        padding: 10px;
+      }
+      .back-link {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>🟢 Kiosk Machine Status</h1>
-  <table>
+  <a href="https://wechangeup.net/" class="back-link">← Back to WeChangeUp.net</a>
+  <h1>🟢 Machine Status Check & Report</h1>
+
+  <h2>Current Status</h2>
+  <table class="status-table">
     <thead>
       <tr>
         <th>Location</th>
@@ -46,25 +102,54 @@
       </tr>
     </thead>
     <tbody id="status-table-body">
-      <!-- Table rows will be injected here -->
+      <!-- Will be filled with live status -->
     </tbody>
   </table>
+
+  <h2>📋 Report a Machine</h2>
+  <form class="form-container" onsubmit="submitForm(event)">
+    <select id="company" onchange="filterLocations()" required>
+      <option value="">Which company?</option>
+      <option value="WeChangeUp">WeChangeUp</option>
+      <option value="Scotiabank">Scotiabank</option>
+      <option value="RBC Royal Bank">RBC Royal Bank</option>
+      <option value="Commonwealth Bank">Commonwealth Bank</option>
+      <option value="CIBC FirstCaribbean">CIBC FirstCaribbean</option>
+      <option value="Island Pay">Island Pay</option>
+    </select>
+
+    <select id="location" required>
+      <option value="">Which location?</option>
+    </select>
+
+    <select id="status" required>
+      <option value="">Was it working?</option>
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+
+    <input type="text" id="name" placeholder="Your name (optional for prize)" />
+    <input type="text" id="phone" placeholder="Phone number (optional)" />
+
+    <button type="submit">Submit Report</button>
+    <div class="thank-you" id="thankYouMessage">Thank you! Your report was received. 🎉</div>
+  </form>
 
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
-    const locations = [
+    const kioskLocations = [
       "Rubis East St and Soldier Rd",
       "Smitty's Sandyport",
       "Quality Home Center Carmichael",
       "Quality Home Center Prince Charles"
     ];
 
-    async function loadStatuses() {
+    async function loadKioskStatus() {
       const { data, error } = await supabase
-        .from('kiosks')
-        .select('*')
-        .order('timestamp', { ascending: false });
+        .from("kiosks")
+        .select("*")
+        .order("timestamp", { ascending: false });
 
       if (error) {
         console.error("Error loading data:", error.message);
@@ -72,40 +157,65 @@
       }
 
       const latestByLocation = {};
-
       data.forEach(entry => {
         if (!latestByLocation[entry.location]) {
           latestByLocation[entry.location] = entry;
         }
       });
 
-      const tbody = document.getElementById('status-table-body');
-      tbody.innerHTML = '';
+      const tbody = document.getElementById("status-table-body");
+      tbody.innerHTML = "";
 
-      const now = Date.now();
-
-      locations.forEach(location => {
-        const row = latestByLocation[location];
+      kioskLocations.forEach(location => {
+        const report = latestByLocation[location];
         let symbol = "🟢";
-        let updatedText = "Just now";
+        let timeText = "Just now";
 
-        if (row) {
-          const isError = row.status === 'error';
-          symbol = isError ? "🔴" : "🟢";
-          updatedText = new Date(row.timestamp).toLocaleString();
+        if (report) {
+          symbol = report.status === "error" ? "🔴" : "🟢";
+          timeText = new Date(report.timestamp).toLocaleString();
         }
 
-        const tr = document.createElement('tr');
+        const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${location}</td>
-          <td class="status">${symbol}</td>
-          <td>${updatedText}</td>
+          <td style="font-size: 20px">${symbol}</td>
+          <td>${timeText}</td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    window.onload = loadStatuses;
+    function submitForm(event) {
+      event.preventDefault();
+      const thankYou = document.getElementById("thankYouMessage");
+      thankYou.style.display = "block";
+      setTimeout(() => (thankYou.style.display = "none"), 5000);
+      event.target.reset();
+    }
+
+    function filterLocations() {
+      const locationsByCompany = {
+        "WeChangeUp": ["Smitty's Sandyport", "Quality Home Center Carmichael", "Quality Home Center Prince Charles", "Rubis East St and Soldier Rd"],
+        "Scotiabank": ["Baha Mar ATM", "Cable Beach Branch", "QVC Pharmacy ATM", "Carmichael Branch"],
+        "RBC Royal Bank": ["Chapter One Bookstore", "Bay Street Branch", "Prince Charles Branch"],
+        "Commonwealth Bank": ["Cable Beach", "Town Centre Mall", "Wulff Road"],
+        "CIBC FirstCaribbean": ["Sandyport Branch", "Thompson Blvd Branch", "Carmichael Branch"],
+        "Island Pay": ["Johnny Canoe – Cable Beach", "TAR Stadium", "LPIA Departure"]
+      };
+
+      const company = document.getElementById("company").value;
+      const locationSelect = document.getElementById("location");
+      locationSelect.innerHTML = '<option value="">Which location?</option>';
+      (locationsByCompany[company] || []).forEach(loc => {
+        const option = document.createElement("option");
+        option.value = loc;
+        option.textContent = loc;
+        locationSelect.appendChild(option);
+      });
+    }
+
+    window.onload = loadKioskStatus;
   </script>
 </body>
 </html>
