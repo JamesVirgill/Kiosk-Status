@@ -105,11 +105,10 @@
       <tr>
         <th>Location</th>
         <th>Status</th>
-        <th>Last Updated</th>
       </tr>
     </thead>
     <tbody id="status-table-body">
-      <!-- Will be filled with live status -->
+      <!-- Live data goes here -->
     </tbody>
   </table>
 
@@ -180,18 +179,15 @@
       kioskLocations.forEach(location => {
         const report = latestByLocation[location];
         let symbol = "🟢";
-        let timeText = "Just now";
 
         if (report) {
           symbol = report.status === "error" ? "🔴" : "🟢";
-          timeText = new Date(report.timestamp).toLocaleString();
         }
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${location}</td>
           <td style="font-size: 20px">${symbol}</td>
-          <td>${timeText}</td>
         `;
         tbody.appendChild(tr);
       });
@@ -226,11 +222,8 @@
       });
     }
 
-    // Load on first visit
     window.onload = loadKioskStatus;
-
-    // Auto-refresh every 5 minutes
-    setInterval(loadKioskStatus, 5 * 60 * 1000);
+    setInterval(loadKioskStatus, 5 * 60 * 1000); // Refresh every 5 minutes
   </script>
 </body>
 </html>
