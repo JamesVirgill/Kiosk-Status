@@ -1,53 +1,41 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-const supabaseUrl = 'https://uhokqclbxoevlxrzeinf.supabase.co';
-const supabaseKey = process.env.SUPABASE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = 'https://uhokqclbxoevlxrzeinf.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk'
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' })
   }
 
   try {
-    const { mail_subject, status } = req.body;
+    const { location, status } = req.body
 
-    if (!mail_subject || !status) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    if (!location || !status) {
+      return res.status(400).json({ error: 'Missing location or status' })
     }
 
-    // Extract the raw machine name from subject
-    const subjectMatch = mail_subject.match(/Connect Alert - (.+?):/);
-    const rawLocation = subjectMatch ? subjectMatch[1].trim() : 'Unknown';
-
-    // Optional mapping to friendly names
-    const locationMap: Record<string, string> = {
-      "QHC Carmichael": "Quality Home Center Carmichael",
-      "Rubis": "Rubis East St and Soldier Rd",
-      "Smitty's": "Smitty's Sandyport",
-      "Quality Home Center": "Quality Home Center Prince Charles"
-    };
-
-    const location = locationMap[rawLocation] || rawLocation;
-
-    // Upsert into Supabase
+    // Insert or update kiosk status
     const { error } = await supabase
       .from('kiosks')
-      .upsert({
-        location,
-        status,
-        timestamp: new Date().toISOString()
-      }, { onConflict: 'location' });
+      .upsert([
+        {
+          location,
+          status,
+          timestamp: new Date().toISOString(),
+        }
+      ], { onConflict: ['location'] })
 
     if (error) {
-      console.error('Supabase error:', error);
-      return res.status(500).json({ error: 'Failed to update status' });
+      console.error('Supabase error:', error)
+      return res.status(500).json({ error: 'Failed to update status' })
     }
 
-    return res.status(200).json({ success: true });
+    return res.status(200).json({ success: true })
+
   } catch (err) {
-    console.error('Handler error:', err);
-    return res.status(500).json({ error: 'Server error' });
+    console.error('Webhook handler error:', err)
+    return res.status(500).json({ error: 'Unexpected server error' })
   }
 }
