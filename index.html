@@ -40,6 +40,11 @@
       padding: 10px;
       text-align: center;
     }
+    .last-updated {
+      font-size: 0.9em;
+      margin-bottom: 10px;
+      color: #aaa;
+    }
     .form-container {
       width: 100%;
       max-width: 400px;
@@ -93,6 +98,8 @@
   <h1>🟢 Machine Status Check & Report</h1>
 
   <h2>Current Status</h2>
+  <div class="last-updated" id="lastUpdatedText">Last updated: never</div>
+
   <table class="status-table">
     <thead>
       <tr>
@@ -164,7 +171,11 @@
       });
 
       const tbody = document.getElementById("status-table-body");
+      const updatedText = document.getElementById("lastUpdatedText");
       tbody.innerHTML = "";
+
+      const now = new Date();
+      updatedText.textContent = "Last updated: " + now.toLocaleString();
 
       kioskLocations.forEach(location => {
         const report = latestByLocation[location];
@@ -215,7 +226,11 @@
       });
     }
 
+    // Load on first visit
     window.onload = loadKioskStatus;
+
+    // Auto-refresh every 5 minutes
+    setInterval(loadKioskStatus, 5 * 60 * 1000);
   </script>
 </body>
 </html>
