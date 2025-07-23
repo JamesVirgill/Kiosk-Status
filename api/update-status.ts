@@ -1,8 +1,16 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 const supabaseUrl = 'https://uhokqclbxoevlxrzeinf.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk'
+const supabaseKey = 'YOUR_SUPABASE_KEY'
 const supabase = createClient(supabaseUrl, supabaseKey)
+
+// Map substrings found in email subjects to the real kiosk location names
+const locationMap = {
+  "Smitty": "Smitty's Sandyport",
+  "QHC Carmichael": "Quality Home Center Carmichael",
+  "Rubis": "Rubis East St and Soldier Rd",
+  "Quality Home Center": "Quality Home Center Prince Charles"
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,20 +18,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { location, status } = req.body
+    const { raw_subject, status } = req.body
 
-    if (!location || !status) {
-      return res.status(400).json({ error: 'Missing location or status' })
+    if (!raw_subject || !status) {
+      return res.status(400).json({ error: 'Missing raw_subject or status' })
     }
 
-    // Insert or update kiosk status
+    // Find matching location by checking for known substrings
+    let matchedLocation = null
+    for (const key in locationMap) {
+      if (raw_subject.includes(key)) {
+        matchedLocation = locationMap[key]
+        break
+      }
+    }
+
+    if (!matchedLocation) {
+      return res.status(400).json({ error: 'No known location found in subject' })
+    }
+
     const { error } = await supabase
       .from('kiosks')
       .upsert([
         {
-          location,
+          location: matchedLocation,
           status,
-          timestamp: new Date().toISOString(),
+          timestamp: new Date().toISOString()
         }
       ], { onConflict: ['location'] })
 
@@ -35,7 +55,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true })
 
   } catch (err) {
-    console.error('Webhook handler error:', err)
+    console.error('Webhook error:', err)
     return res.status(500).json({ error: 'Unexpected server error' })
   }
 }
