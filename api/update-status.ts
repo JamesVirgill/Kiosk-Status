@@ -1,65 +1,59 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+import { VercelRequest, VercelResponse } from '@vercel/node'
+import { createClient } from '@supabase/supabase-js'
 
-// Initialize Supabase
 const supabaseUrl = 'https://uhokqclbxoevlxrzeinf.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' // 👈 Use your actual anon key here
+const supabaseKey = process.env.SUPABASE_KEY || '' // Use environment variable for safety
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-// Map keywords in the email subject line to the kiosk names used in your frontend and Supabase
-const locationMap = {
-  "smitty's": "Smitty's Sandyport",
-  "qhc carmichael": "Quality Home Center Carmichael",
-  "quality home center": "Quality Home Center Prince Charles",
-  "rubis": "Rubis East St and Soldier Rd"
-}
-
-export default async function handler(req, res) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
   try {
-    const { raw_subject, status } = req.body
+    const {
+      raw_subject,
+      status,
+      id,
+      processed_at_iso8601
+    } = req.body
 
-    // Basic validation
-    if (!raw_subject || !status) {
-      return res.status(400).json({ error: 'Missing raw_subject or status in request body' })
+    if (!raw_subject || !status || !id) {
+      return res.status(400).json({ error: 'Missing required fields' })
     }
 
-    // Try to match the subject line to a known kiosk
-    const lower = raw_subject.toLowerCase()
-    let matchedLocation = null
-    for (const key in locationMap) {
-      if (lower.includes(key)) {
-        matchedLocation = locationMap[key]
-        break
-      }
+    // Extract location from the subject line
+    const parts = raw_subject.split(' - ')
+    let location = parts[1]?.split(':')[0]?.trim()
+
+    // Normalize known locations
+    if (location?.toLowerCase().includes("smitty")) location = "Smitty's Sandyport"
+    else if (location?.toLowerCase().includes("qhc") || location?.toLowerCase().includes("quality home")) location = "Quality Home Center Carmichael"
+    else if (location?.toLowerCase().includes("rubis")) location = "Rubis East St and Soldier Rd"
+
+    if (!location) {
+      return res.status(400).json({ error: 'Could not parse location from subject' })
     }
 
-    if (!matchedLocation) {
-      return res.status(400).json({ error: 'No known location found in subject line' })
-    }
-
-    // Insert or update in Supabase
     const { error } = await supabase
       .from('kiosks')
       .upsert([
         {
-          location: matchedLocation,
+          id,
+          location,
           status,
-          timestamp: new Date().toISOString()
+          timestamp: processed_at_iso8601
         }
       ], { onConflict: ['location'] })
 
     if (error) {
-      console.error('Supabase insert error:', error)
+      console.error('Supabase error:', error)
       return res.status(500).json({ error: 'Failed to update Supabase' })
     }
 
     return res.status(200).json({ success: true })
-
   } catch (err) {
-    console.error('Webhook handler error:', err)
-    return res.status(500).json({ error: 'Unexpected server error' })
+    console.error('Unexpected error:', err)
+    return res.status(500).json({ error: 'Unexpected error occurred' })
   }
 }
