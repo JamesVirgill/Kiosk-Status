@@ -113,8 +113,8 @@
   </table>
 
   <h2>📋 Report a Machine</h2>
-  <form class="form-container" onsubmit="submitForm(event)">
-    <select id="company" onchange="filterLocations()" required>
+  <form class="form-container" action="https://formspree.io/f/mzzvekba" method="POST" onsubmit="handleFormSubmit(event)">
+    <select name="company" id="company" onchange="filterLocations()" required>
       <option value="">Which company?</option>
       <option value="WeChangeUp">WeChangeUp</option>
       <option value="Scotiabank">Scotiabank</option>
@@ -124,18 +124,18 @@
       <option value="Island Pay">Island Pay</option>
     </select>
 
-    <select id="location" required>
+    <select name="location" id="location" required>
       <option value="">Which location?</option>
     </select>
 
-    <select id="status" required>
+    <select name="status" required>
       <option value="">Was it working?</option>
       <option value="Yes">Yes</option>
       <option value="No">No</option>
     </select>
 
-    <input type="text" id="name" placeholder="Your name (optional for prize)" />
-    <input type="text" id="phone" placeholder="Phone number (optional)" />
+    <input type="text" name="name" placeholder="Your name (optional for prize)" />
+    <input type="text" name="phone" placeholder="Phone number (optional)" />
 
     <button type="submit">Submit Report</button>
     <div class="thank-you" id="thankYouMessage">Thank you! Your report was received. 🎉</div>
@@ -193,12 +193,27 @@
       });
     }
 
-    function submitForm(event) {
+    window.onload = loadKioskStatus;
+    setInterval(loadKioskStatus, 5 * 60 * 1000); // Refresh every 5 minutes
+  </script>
+
+  <script>
+    function handleFormSubmit(event) {
       event.preventDefault();
-      const thankYou = document.getElementById("thankYouMessage");
-      thankYou.style.display = "block";
-      setTimeout(() => (thankYou.style.display = "none"), 5000);
-      event.target.reset();
+      const form = event.target;
+
+      fetch(form.action, {
+        method: form.method,
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json' }
+      }).then(response => {
+        if (response.ok) {
+          document.getElementById("thankYouMessage").style.display = "block";
+          form.reset();
+        } else {
+          alert("There was an issue submitting the form. Please try again.");
+        }
+      });
     }
 
     function filterLocations() {
@@ -221,9 +236,6 @@
         locationSelect.appendChild(option);
       });
     }
-
-    window.onload = loadKioskStatus;
-    setInterval(loadKioskStatus, 5 * 60 * 1000); // Refresh every 5 minutes
   </script>
 </body>
 </html>
