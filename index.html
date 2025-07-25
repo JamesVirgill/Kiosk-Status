@@ -99,31 +99,39 @@
   </table>
 
   <h2>📋 Report a Machine</h2>
-  <form class="form-container" action="https://formspree.io/f/mzzvekba" method="POST">
-    <select name="company" required>
-      <option value="">Which company?</option>
-      <option value="WeChangeUp">WeChangeUp</option>
-      <option value="Scotiabank">Scotiabank</option>
-      <option value="RBC Royal Bank">RBC Royal Bank</option>
-      <option value="Commonwealth Bank">Commonwealth Bank</option>
-      <option value="CIBC FirstCaribbean">CIBC FirstCaribbean</option>
-      <option value="Island Pay">Island Pay</option>
-    </select>
+ <form class="form-container" action="https://formspree.io/f/mzzvekba" method="POST">
+  <select name="company" required>
+    <option value="">Which company?</option>
+    <option value="WeChangeUp">WeChangeUp</option>
+    <option value="Scotiabank">Scotiabank</option>
+    <option value="RBC Royal Bank">RBC Royal Bank</option>
+    <option value="Commonwealth Bank">Commonwealth Bank</option>
+    <option value="CIBC FirstCaribbean">CIBC FirstCaribbean</option>
+    <option value="Island Pay">Island Pay</option>
+  </select>
 
-    <input type="text" name="location" placeholder="Location" required />
-    <select name="status" required>
-      <option value="">Was it working?</option>
-      <option value="Yes">Yes</option>
-      <option value="No">No</option>
-    </select>
+  <select name="location" required>
+    <option value="">Which location?</option>
+    <option value="Smitty's Sandyport">Smitty's Sandyport</option>
+    <option value="Quality Home Center Carmichael">Quality Home Center Carmichael</option>
+    <option value="Quality Home Center Prince Charles">Quality Home Center Prince Charles</option>
+    <option value="Rubis East St and Soldier Rd">Rubis East St and Soldier Rd</option>
+  </select>
 
-    <input type="text" name="name" placeholder="Your name (optional)" />
-    <input type="text" name="phone" placeholder="Phone number (optional)" />
+  <select name="status" required>
+    <option value="">Was it working?</option>
+    <option value="Yes">Yes</option>
+    <option value="No">No</option>
+  </select>
 
-    <button type="submit">Submit Report</button>
-    <div class="thank-you" id="thankYouMessage">Thank you! Your report was received. 🎉</div>
-  </form>
+  <input type="text" name="name" placeholder="Your name (optional)" />
+  <input type="text" name="phone" placeholder="Phone number (optional)" />
 
+  <button type="submit">Submit Report</button>
+  <div class="thank-you" id="thankYouMessage">Thank you! Your report was received. 🎉</div>
+</form>
+
+  
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
