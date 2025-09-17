@@ -42,9 +42,45 @@
 
         h1 {
             color: #00c0d4;
-            margin-bottom: 60px;
+            margin-bottom: 20px;
             font-size: 48px;
             text-align: center;
+        }
+
+        .tip-box {
+            max-width: 900px;
+            background: rgba(18, 27, 31, 0.9);
+            border: 2px solid #2E3D3E;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 0 auto 40px auto;
+            color: #e5e7eb;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            text-align: left;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .tip-box .tip-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: #facc15;
+        }
+
+        .tip-box .tip-title svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .tip-box p {
+            margin: 8px 0;
+        }
+
+        .tip-box strong {
+            color: #00c0d4;
         }
 
         .card {
@@ -82,11 +118,8 @@
             padding: 10px;
             border-radius: 6px;
             border: none;
-            /* hides default arrow in some browsers */
             -webkit-appearance: none;
-            /* Safari/Chrome */
             -moz-appearance: none;
-            /* Firefox */
             background: url('data:image/svg+xml;utf8,<svg fill="white" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.5rem center;
             background-color: #212D2E;
             color: #fff;
@@ -151,14 +184,10 @@
             box-sizing: border-box;
             font-family: 'Montserrat', sans-serif !important;
             appearance: none;
-            /* hides default arrow in some browsers */
             -webkit-appearance: none;
-            /* Safari/Chrome */
             -moz-appearance: none;
-            /* Firefox */
             background: url('data:image/svg+xml;utf8,<svg fill="white" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 0.5rem center;
             background-color: #253031;
-            /* your background */
             background-size: 1rem;
         }
 
@@ -221,6 +250,20 @@
 <body>
     <div class="container">
         <h1>Check Kiosk Status</h1>
+
+        <div class="tip-box">
+            <div class="tip-title">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8h.01M11 11h2v5h-2z" fill="currentColor"/>
+                </svg>
+                <span>Quick tip</span>
+            </div>
+            <p>Know the status of a kiosk before you go. This was designed as a quick access app for your phone.</p>
+            <p><strong>Android:</strong> Tap the three-dot menu, choose “Add to Home screen” (or “Install”), then confirm.</p>
+            <p><strong>iOS:</strong> Open this site in Safari, tap the Share button (square with arrow), then “Add to Home Screen.”</p>
+        </div>
+
         <div class="content">
             <!-- Status Card -->
             <div class="card status-card">
@@ -261,8 +304,7 @@
                         <option value="">Which location?</option>
                         <option value="Smitty's Sandyport">Smitty's Sandyport</option>
                         <option value="Quality Home Center Carmichael">Quality Home Center Carmichael</option>
-                        <option value="Quality Home Center Prince Charles">Quality Home Center Prince Charles
-                        </option>
+                        <option value="Quality Home Center Prince Charles">Quality Home Center Prince Charles</option>
                         <option value="Rubis East St and Soldier Rd">Rubis East St and Soldier Rd</option>
                     </select>
                     <select name="helpful" required>
@@ -325,7 +367,8 @@
                 <td style="text-align: center">${statusIcon}</td>
                 `;
                 tbody.appendChild(row);
-            }); document.getElementById("lastUpdatedText").textContent = latestTime ? `Last updated: ${formatTime(latestTime)}` : "Last updated: N/A";
+            });
+            document.getElementById("lastUpdatedText").textContent = latestTime ? `Last updated: ${formatTime(latestTime)}` : "Last updated: N/A";
         }
         window.onload = loadStatusFromSupabase;
         setInterval(loadStatusFromSupabase, 5 * 60 * 1000); // Refresh every 5 mins
