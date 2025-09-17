@@ -43,7 +43,7 @@
         h1 {
             color: #00c0d4;
             margin-bottom: 20px;
-            font-size: 48px;
+            font-size: 56px;
             text-align: center;
         }
 
@@ -75,13 +75,8 @@
             height: 20px;
         }
 
-        .tip-box p {
-            margin: 8px 0;
-        }
-
-        .tip-box strong {
-            color: #00c0d4;
-        }
+        .tip-box p { margin: 8px 0; }
+        .tip-box strong { color: #00c0d4; }
 
         .card {
             border-radius: 12px;
@@ -132,10 +127,7 @@
             margin: 5px 0 0 0;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+        table { width: 100%; border-collapse: collapse; }
 
         thead th {
             text-align: left;
@@ -163,15 +155,8 @@
             border-radius: 100%;
         }
 
-        .status-up {
-            border: 1px solid #10b981;
-            background: rgba(16, 185, 129, 0.15);
-        }
-
-        .status-down {
-            border: 1px solid #ef4444;
-            background: rgba(239, 68, 68, 0.15);
-        }
+        .status-up { border: 1px solid #10b981; background: rgba(16, 185, 129, 0.15); }
+        .status-down { border: 1px solid #ef4444; background: rgba(239, 68, 68, 0.15); }
 
         .poll-card select,
         .poll-card input {
@@ -218,12 +203,14 @@
             max-width: 1000px;
         }
 
-        .status-card {
-            grid-column: span 8;
-        }
+        .status-card { grid-column: span 8; }
+        .poll-card   { grid-column: span 4; }
 
-        .poll-card {
-            grid-column: span 4;
+        .section-note {
+            margin: -10px 0 10px 0;
+            color: #e5e7eb;
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
 
         .thank-you {
@@ -244,20 +231,11 @@
             text-decoration: none;
         }
 
-        .footer a:hover {
-            text-decoration: underline;
-        }
+        .footer a:hover { text-decoration: underline; }
 
         @media (max-width: 768px) {
-
-            .status-card,
-            .poll-card {
-                grid-column: span 12;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
+            .status-card, .poll-card { grid-column: span 12; }
+            h1 { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -301,17 +279,17 @@
                         </tr>
                     </thead>
                     <tbody id="status-table-body">
-
                     </tbody>
                 </table>
             </div>
 
             <!-- Poll Card -->
             <div class="card poll-card">
+                <p class="section-note">Please tell us which company you’d like to see displayed next.</p>
                 <h2>Customer Feedback</h2>
                 <form class="form-container" action="https://formspree.io/f/mzzvekba" method="POST">
                     <select name="company" required>
-                        <option value="">Which company would you like to see displayed?</option>
+                        <option value="">Which company?</option>
                         <option value="Quick Pay">Quick Pay</option>
                         <option value="RBC">RBC</option>
                         <option value="Scotia">Scotia</option>
