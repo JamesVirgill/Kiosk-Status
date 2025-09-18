@@ -157,7 +157,7 @@
         <div class="status-header">
           <div>
             <h2>WeChangeUp</h2>
-            <div class="last-update" id="lastUpdatedText">Last status change: N/A</div>
+            <div class="last-update" id="lastUpdatedText">Last Status Change: N/A</div>
           </div>
           <select name="company" class="company-select" required>
             <option value="WeChangeUp">WeChangeUp</option>
@@ -259,7 +259,7 @@
       });
 
       document.getElementById("lastUpdatedText").textContent =
-        latestTime ? `Last status change: ${formatTime(latestTime)}` : "Last status change: N/A";
+        latestTime ? `Last Status Change: ${formatTime(latestTime)}` : "Last Status Change: N/A";
     }
 
     window.onload = loadStatusFromSupabase;
