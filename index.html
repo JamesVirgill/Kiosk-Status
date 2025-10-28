@@ -5,6 +5,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kiosk Status</title>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYJQG7P9Q4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RYJQG7P9Q4'); 
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
     body {
@@ -74,7 +83,7 @@
 
     .card { border-radius: 12px; padding: 20px; margin: 10px; }
     .status-card { background: #151F1F; border: 2px solid #2E3D3E; }
-    .poll-card   { background: #1D2A2B; border: 2px solid #2E3D3E; }
+    .poll-card    { background: #1D2A2B; border: 2px solid #2E3D3E; }
 
     .status-header {
       display: flex; justify-content: space-between; align-items: center;
@@ -105,7 +114,7 @@
       display: inline-block; width: 28px; height: 28px;
       line-height: 28px; text-align: center; font-size: 1rem; border-radius: 100%;
     }
-    .status-up   { border: 1px solid #10b981; background: rgba(16,185,129,0.15); }
+    .status-up  { border: 1px solid #10b981; background: rgba(16,185,129,0.15); }
     .status-down { border: 1px solid #ef4444; background: rgba(239,68,68,0.15); }
 
     .poll-card select, .poll-card input {
@@ -124,7 +133,7 @@
 
     .content { display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px; width: 100%; max-width: 1000px; }
     .status-card { grid-column: span 8; }
-    .poll-card   { grid-column: span 4; }
+    .poll-card    { grid-column: span 4; }
 
     .section-note { margin: -10px 0 10px 0; color: #e5e7eb; font-size: 0.9rem; opacity: 0.9; }
     .thank-you { margin-top: 20px; color: #0f0; font-weight: bold; display: none; }
@@ -144,7 +153,6 @@
   <div class="container">
     <h1>Check Kiosk Status <span class="version">(Beta v2.7)</span></h1>
 
-    <!-- Collapsible tip box (loads collapsed by default) -->
     <details class="tip-box">
       <summary class="tip-title">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -162,7 +170,6 @@
     </details>
 
     <div class="content">
-      <!-- Status Card -->
       <div class="card status-card">
         <div class="status-header">
           <div>
@@ -186,7 +193,6 @@
         </table>
       </div>
 
-      <!-- Poll Card -->
       <div class="card poll-card">
         <h2>Customer Feedback</h2>
         <p class="section-note">Please tell us which company you’d like to see displayed next.</p>
@@ -220,7 +226,6 @@
     </div>
   </div>
 
-  <!-- App logic -->
   <script type="module">
     import { supabase } from './supabaseClient.js';
 
