@@ -47,7 +47,6 @@
       padding: 2rem 1rem 3rem;
     }
 
-    /* Header */
     .header {
       text-align: center;
       margin-bottom: 2rem;
@@ -93,7 +92,6 @@
 
     .header p { color: var(--muted); font-size: 1.125rem; }
 
-    /* Tips Section */
     .tips-card {
       background: var(--card-gradient);
       border: 1px solid var(--border);
@@ -183,7 +181,6 @@
     .tips-item-header h4 { font-weight: 600; color: var(--foreground); }
     .tips-item p { font-size: 0.875rem; color: var(--muted); }
 
-    /* Main Grid */
     .main-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -196,7 +193,6 @@
       .main-grid { grid-template-columns: 2fr 1fr; }
     }
 
-    /* Controls */
     .controls {
       display: flex;
       flex-wrap: wrap;
@@ -277,7 +273,6 @@
     .last-updated { font-size: 0.875rem; color: var(--muted); }
     .location-count { font-size: 0.875rem; color: var(--muted); }
 
-    /* Kiosk Cards */
     .kiosk-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -332,7 +327,6 @@
     .kiosk-address:hover { color: var(--primary); }
     .kiosk-address svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-    /* Status Badge */
     .status-badge {
       display: inline-flex;
       align-items: center;
@@ -372,7 +366,6 @@
       animation: pulse-error 2s ease-in-out infinite;
     }
 
-    /* Feedback Form */
     .feedback-card {
       background: var(--card-gradient);
       border: 1px solid var(--border);
@@ -448,7 +441,6 @@
     .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .submit-btn svg { width: 16px; height: 16px; }
 
-    /* Success State */
     .feedback-success {
       text-align: center;
       padding: 2rem 1rem;
@@ -480,7 +472,6 @@
 
     .feedback-success p { font-size: 0.875rem; color: var(--muted); }
 
-    /* Footer */
     footer {
       text-align: center;
       margin-top: 4rem;
@@ -499,10 +490,8 @@
     footer a:hover { color: var(--primary); }
     footer a svg { width: 16px; height: 16px; }
 
-    /* Loading */
     .loading { text-align: center; color: var(--muted); padding: 2rem; grid-column: 1 / -1; }
 
-    /* Animations */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -526,19 +515,17 @@
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
     <header class="header">
       <div class="header-icon">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
       </div>
       <h1>
         <span class="gradient">Check Kiosk Status</span>
-        <span class="version">(v1.0)</span>
+        <span class="version">(Beta v2.8)</span>
       </h1>
-      <p>Check availability before you go!</p>
+      <p>Check availability before you go</p>
     </header>
 
-    <!-- Tips Section -->
     <div class="tips-card" onclick="this.classList.toggle('open')">
       <div class="tips-header">
         <div class="tips-header-left">
@@ -547,7 +534,7 @@
           </div>
           <div>
             <div class="tips-title">Getting Started</div>
-            <div class="tips-subtitle">Learn how to use this web app</div>
+            <div class="tips-subtitle">Learn how to use this app</div>
           </div>
         </div>
         <svg class="tips-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
@@ -573,9 +560,7 @@
       </div>
     </div>
 
-    <!-- Main Grid -->
     <div class="main-grid">
-      <!-- Status Section -->
       <div>
         <div class="controls">
           <div class="controls-left">
@@ -598,7 +583,6 @@
         </div>
       </div>
 
-      <!-- Feedback Form -->
       <div>
         <div class="feedback-card" id="feedbackCard">
           <h2>Customer Feedback</h2>
@@ -645,7 +629,6 @@
       </div>
     </div>
 
-    <!-- Footer -->
     <footer>
       <a href="https://wechangeup.net" target="_blank" rel="noopener noreferrer">
         <span>Back to WeChangeUp.net</span>
@@ -654,8 +637,13 @@
     </footer>
   </div>
 
-  <script src="supabaseClient.js"></script>
-  <script>
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const supabaseUrl = "https://uhokqclbxoevlxrzeinf.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVob2txY2xieG9ldmx4cnplaW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc1MTg5NDMsImV4cCI6MjA2MzA5NDk0M30.1EtiWsCOnC3cPklPKUNVGJ0M9fFtvAAf0znRDVy9Tqk";
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     const locationMap = {
       "Smitty's": { name: "Smitty's Sandyport", address: "101-103 Church Street, Sandyport" },
       "QHC Carmichael": { name: "Quality Home Center Carmichael", address: "Baillou Hill Rd, Nassau" },
@@ -681,7 +669,6 @@
           return;
         }
 
-        // Get latest report per location
         const latestReports = {};
         data?.forEach(row => {
           if (!latestReports[row.location] || row.timestamp > latestReports[row.location].timestamp) {
@@ -742,7 +729,6 @@
       }).join('');
     }
 
-    // Feedback form
     document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = e.target.querySelector('.submit-btn');
@@ -784,7 +770,6 @@
       }
     });
 
-    // Init
     refreshBtn.addEventListener('click', loadKiosks);
     loadKiosks();
     setInterval(loadKiosks, 5 * 60 * 1000);
