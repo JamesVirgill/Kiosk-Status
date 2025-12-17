@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +13,19 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="apple-touch-icon" href="icons/icon-192.png" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYJQG7P9Q4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RYJQG7P9Q4', {
+      send_page_view: true
+    });
+  </script>
+
   <style>
     :root {
       --background: hsl(192, 30%, 10%);
@@ -32,7 +45,7 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
+
     body {
       font-family: 'Montserrat', sans-serif;
       background: linear-gradient(135deg, var(--background) 0%, hsl(192, 25%, 14%) 100%);
@@ -645,11 +658,11 @@
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const locationMap = {
-  "Smitty's": { name: "Smitty's Sandyport", address: "Smitty's, Sandyport, Nassau, Bahamas" },
-  "QHC Carmichael": { name: "Quality Home Center Carmichael", address: "Quality Home Center, Baillou Hill Rd and Carmichael, Nassau, Bahamas" },
-  "Quality Home Center": { name: "Quality Home Center Prince Charles", address: "Quality Home Center Prince Charles, Nassau, Bahamas" },
-  "Rubis": { name: "Rubis", address: "Rubis, East St and Soldier Road, Nassau, Bahamas" }
-};
+      "Smitty's": { name: "Smitty's Sandyport", address: "Smitty's, Sandyport, Nassau, Bahamas" },
+      "QHC Carmichael": { name: "Quality Home Center Carmichael", address: "Quality Home Center, Baillou Hill Rd and Carmichael, Nassau, Bahamas" },
+      "Quality Home Center": { name: "Quality Home Center Prince Charles", address: "Quality Home Center Prince Charles, Nassau, Bahamas" },
+      "Rubis": { name: "Rubis", address: "Rubis, East St and Soldier Road, Nassau, Bahamas" }
+    };
 
     const kioskGrid = document.getElementById('kioskGrid');
     const refreshBtn = document.getElementById('refreshBtn');
@@ -657,7 +670,7 @@
 
     async function loadKiosks() {
       refreshBtn.classList.add('spinning');
-      
+
       try {
         const { data, error } = await supabase
           .from('kiosks')
@@ -691,10 +704,10 @@
         });
 
         renderKiosks(kiosks);
-        lastUpdatedEl.textContent = latestTime 
-          ? `Last status change: ${latestTime.toLocaleTimeString()}` 
+        lastUpdatedEl.textContent = latestTime
+          ? `Last status change: ${latestTime.toLocaleTimeString()}`
           : `Last status change: ${new Date().toLocaleTimeString()}`;
-          
+
       } catch (err) {
         console.error('Failed to load kiosks:', err);
       } finally {
@@ -704,11 +717,11 @@
 
     function renderKiosks(kiosks) {
       const mapsIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>`;
-      
+
       kioskGrid.innerHTML = kiosks.map(kiosk => {
         const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(kiosk.address + ', Bahamas')}`;
         const statusLabel = kiosk.status === 'online' ? 'Available' : 'Out of Use';
-        
+
         return `
           <div class="kiosk-card">
             <div class="kiosk-header">
@@ -776,3 +789,4 @@
   </script>
 </body>
 </html>
+```
