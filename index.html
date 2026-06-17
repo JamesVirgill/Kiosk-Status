@@ -362,6 +362,12 @@
       color: var(--destructive);
     }
 
+    .status-badge.coming-soon {
+      background: hsla(180, 10%, 65%, 0.1);
+      border: 1px solid hsla(180, 10%, 65%, 0.3);
+      color: var(--muted);
+    }
+
     .status-dot {
       width: 8px;
       height: 8px;
@@ -376,6 +382,11 @@
     .status-badge.offline .status-dot {
       background: var(--destructive);
       animation: pulse-error 2s ease-in-out infinite;
+    }
+
+    .status-badge.coming-soon .status-dot {
+      background: var(--muted);
+      animation: none;
     }
 
     .feedback-card {
@@ -533,7 +544,7 @@
       </div>
       <h1>
         <span class="gradient">Check Kiosk Status</span>
-        <span class="version">(Beta v2.9)</span>
+        <span class="version">(Beta v3.0)</span>
       </h1>
       <p>Check availability before you go</p>
     </header>
@@ -587,7 +598,7 @@
             </button>
             <span class="last-updated" id="lastUpdated"></span>
           </div>
-          <span class="location-count" id="locationCount">4 locations</span>
+          <span class="location-count" id="locationCount">5 locations</span>
         </div>
 
         <div class="kiosk-grid" id="kioskGrid">
@@ -660,7 +671,8 @@
       "Smitty's": { name: "Smitty's Sandyport", address: "Smitty's, Sandyport, Nassau, Bahamas" },
       "QHC Carmichael": { name: "Quality Home Center Carmichael", address: "Quality Home Center, Baillou Hill Rd and Carmichael, Nassau, Bahamas" },
       "Quality Home Center": { name: "Quality Home Center Prince Charles", address: "Quality Home Center Prince Charles, Nassau, Bahamas" },
-      "Rubis": { name: "Rubis", address: "Rubis, East St and Soldier Road, Nassau, Bahamas" }
+      "Rubis": { name: "Rubis", address: "Rubis, East St and Soldier Road, Nassau, Bahamas" },
+      "Sun Luck": { name: "Sun Luck Wulff Road", address: "Sun Luck, Wulff Road, Nassau, Bahamas", comingSoon: true }
     };
 
     const kioskGrid = document.getElementById('kioskGrid');
@@ -698,7 +710,7 @@
           return {
             name: display.name,
             address: display.address,
-            status: report?.status === 'error' ? 'offline' : 'online'
+            status: display.comingSoon ? 'coming-soon' : (report?.status === 'error' ? 'offline' : 'online')
           };
         });
 
@@ -719,7 +731,10 @@
 
       kioskGrid.innerHTML = kiosks.map(kiosk => {
         const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(kiosk.address + ', Bahamas')}`;
-        const statusLabel = kiosk.status === 'online' ? 'Available' : 'Out of Use';
+        const statusLabel =
+          kiosk.status === 'coming-soon' ? 'Coming Soon' :
+          kiosk.status === 'online' ? 'Available' :
+          'Out of Use';
 
         return `
           <div class="kiosk-card">
